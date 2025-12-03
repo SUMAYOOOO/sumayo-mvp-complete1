@@ -17,7 +17,7 @@ const common_1 = require("@nestjs/common");
 const stripe_1 = require("stripe");
 const stripe_service_1 = require("./stripe.service");
 const stripeService = new stripe_service_1.StripeService();
-const stripe = new stripe_1.default(process.env.STRIPE_SECRET || '', { apiVersion: '2023-10-16' });
+const stripe = new stripe_1.default(process.env.STRIPE_SECRET || '', { apiVersion: '2022-11-15' });
 let PaymentsController = class PaymentsController {
     async checkout(body) {
         const { topicId, successUrl, cancelUrl } = body;

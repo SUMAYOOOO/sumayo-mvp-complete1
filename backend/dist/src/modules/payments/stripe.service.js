@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.StripeService = void 0;
 const stripe_1 = require("stripe");
 const prisma_client_1 = require("../../prisma.client");
-const stripe = new stripe_1.default(process.env.STRIPE_SECRET || '', { apiVersion: '2023-10-16' });
+const stripe = new stripe_1.default(process.env.STRIPE_SECRET || '', { apiVersion: '2022-11-15' });
 class StripeService {
     async getOrCreatePriceForTopic(topicId) {
         const topic = await prisma_client_1.default.topic.findUnique({ where: { id: topicId } });
