@@ -3,7 +3,7 @@ import Stripe from 'stripe';
 import { StripeService } from './stripe.service';
 
 const stripeService = new StripeService();
-const stripe = new Stripe(process.env.STRIPE_SECRET || '', { apiVersion: '2023-10-16' });
+const stripe = new Stripe(process.env.STRIPE_SECRET || '', { apiVersion: '2022-11-15' });
 
 @Controller('payments')
 export class PaymentsController {
