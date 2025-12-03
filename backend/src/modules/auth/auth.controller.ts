@@ -1,29 +1,58 @@
-import { Controller, Post, Body, BadRequestException } from '@nestjs/common';
-import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
-import prisma from '../../prisma.client';
-
-const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret';
+import { Controller, Post, Body } from '@nestjs/common';
+import { DatabaseService } from '../../data/database.service';
 
 @Controller('auth')
 export class AuthController {
-  @Post('register')
-  async register(@Body() body: any) {
-    const { name, email, password } = body;
-    if (!email || !password) throw new BadRequestException('Missing');
-    const hashed = await bcrypt.hash(password, 10);
-    const user = await prisma.user.create({ data: { name, email, hashedPassword: hashed, role: 'student' }});
-    return { id: user.id, email: user.email };
-  }
+  constructor(private database: DatabaseService) {}
 
   @Post('login')
-  async login(@Body() body: any) {
-    const { email, password } = body;
-    const user = await prisma.user.findUnique({ where: { email }});
-    if (!user || !user.hashedPassword) throw new BadRequestException('Invalid');
-    const ok = await bcrypt.compare(password, user.hashedPassword);
-    if (!ok) throw new BadRequestException('Invalid');
-    const token = jwt.sign({ sub: user.id, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
-    return { accessToken: token };
+  login(@Body() body: { email: string; password: string }) {
+    const user = this.database.findUserByEmail(body.email);
+    
+    if (!user) {
+      return { success: false, message: 'Usuario no encontrado' };
+    }
+
+    if (user.password !== body.password) {
+      return { success: false, message: 'Contraseña incorrecta' };
+    }
+
+    // En producción, usar JWT
+    return {
+      success: true,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role
+      },
+      token: 'demo-token-' + Date.now()
+    };
+  }
+
+  @Post('register')
+  register(@Body() body: { name: string; email: string; password: string }) {
+    const existingUser = this.database.findUserByEmail(body.email);
+    
+    if (existingUser) {
+      return { success: false, message: 'El usuario ya existe' };
+    }
+
+    const newUser = this.database.createUser({
+      name: body.name,
+      email: body.email,
+      password: body.password,
+      role: 'student'
+    });
+
+    return {
+      success: true,
+      user: {
+        id: newUser.id,
+        name: newUser.name,
+        email: newUser.email,
+        role: newUser.role
+      }
+    };
   }
 }

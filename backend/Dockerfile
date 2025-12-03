@@ -1,8 +1,19 @@
 FROM node:20-alpine
+
 WORKDIR /usr/src/app
-COPY package.json package-lock.json* ./
-RUN npm install --legacy-peer-deps
+
+# Copiar dependencias
+COPY package*.json ./
+RUN npm ci --only=production
+
+# Copiar aplicación
 COPY . .
-RUN npm run build || true
+
+# Construir
+RUN npm run build
+
+# Exponer puerto
 EXPOSE 3001
-CMD ["npm", "run", "start:dev"]
+
+# Comando de inicio
+CMD ["node", "dist/main.js"]

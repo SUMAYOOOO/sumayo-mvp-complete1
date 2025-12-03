@@ -1,13 +1,34 @@
 import { Controller, Get, Param } from '@nestjs/common';
-import prisma from '../../prisma.client';
+import { DatabaseService } from '../../data/database.service';
+
 @Controller('courses')
 export class CoursesController {
+  constructor(private database: DatabaseService) {}
+
   @Get()
-  async list() {
-    return prisma.course.findMany({ include: { topics: true }});
+  getAllCourses() {
+    return this.database.getAllCourses();
   }
+
   @Get(':slug')
-  async bySlug(@Param('slug') slug: string) {
-    return prisma.course.findUnique({ where: { slug }, include: { topics: true }});
+  getCourse(@Param('slug') slug: string) {
+    const course = this.database.getCourseBySlug(slug);
+    
+    if (!course) {
+      return { message: 'Curso no encontrado' };
+    }
+
+    const topics = this.database.getTopicsByCourse(course.id);
+    
+    return {
+      ...course,
+      topics: topics.map(topic => ({
+        id: topic.id,
+        title: topic.title,
+        description: topic.description,
+        price: topic.price,
+        isFree: topic.isFree
+      }))
+    };
   }
 }
