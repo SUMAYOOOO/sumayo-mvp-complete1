@@ -1,0 +1,5 @@
+[build]
+command = "echo 'SUMAYÕ: Backend despliega en Railway, Frontend en Vercel'"
+
+[run]
+command = "echo 'Consulta DEPLOYMENT.md para instrucciones de despliegue' && sleep 10"
